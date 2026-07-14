@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Controller
 @RequestMapping("/consultas")
@@ -54,6 +56,17 @@ public class ConsultaController {
         model.addAttribute("productos", lista);
         model.addAttribute("precioInf", precioInf);
         model.addAttribute("precioSup", precioSup);
+        return "/consultas/listado";
+    }
+    // Consulta de fecha
+    @PostMapping("/consultaFecha")
+    public String consultaFecha(@RequestParam() @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInf,
+            @RequestParam() @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaSup,
+            Model model) {
+        var lista = productoService.consultaPorFecha(fechaInf, fechaSup);
+        model.addAttribute("productos", lista);
+        model.addAttribute("fechaInf", fechaInf);
+        model.addAttribute("fechaSup", fechaSup);
         return "/consultas/listado";
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import java.time.LocalDate;
 
 @Service
 public class ProductoService {
@@ -63,5 +64,10 @@ public class ProductoService {
     @Transactional(readOnly = true)
     public List<Producto> consultaSQL(BigDecimal precioInf, BigDecimal precioSup) {
         return productoRepository.consultaSQL(precioInf, precioSup);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Producto> consultaPorFecha(LocalDate fechaInf, LocalDate fechaSup) {
+        return productoRepository.consultaPorFecha(fechaInf, fechaSup);
     }
 }

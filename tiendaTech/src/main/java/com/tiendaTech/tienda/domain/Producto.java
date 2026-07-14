@@ -1,14 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.tiendaTech.tienda.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -43,5 +41,9 @@ public class Producto implements Serializable {
     @Column(name = "ruta_imagen", length = 1024)
     private String rutaImagen;
     private boolean activo;
+
+    // Rellena los datos automáticamente en la BD
+    @Column(name = "fecha_creacion", insertable = false, updatable = false)
+    private LocalDate fechaCreacion;
 
 }
