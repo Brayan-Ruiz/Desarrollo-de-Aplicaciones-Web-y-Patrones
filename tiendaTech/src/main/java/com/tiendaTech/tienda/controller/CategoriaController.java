@@ -40,6 +40,7 @@ public class CategoriaController {
 
     @PostMapping("/guardar")
     public String guardar(@Valid Categoria categoria, @RequestParam MultipartFile imagenFile, RedirectAttributes redirectAttributes) {
+
         categoriaService.save(categoria, imagenFile);
         redirectAttributes.addFlashAttribute("todoOk", messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
 

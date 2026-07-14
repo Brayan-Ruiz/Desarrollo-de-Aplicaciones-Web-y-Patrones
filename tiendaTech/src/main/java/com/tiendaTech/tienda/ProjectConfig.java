@@ -67,4 +67,3 @@ public class ProjectConfig implements WebMvcConfigurer {
         return messageSource;
     }
 }
-

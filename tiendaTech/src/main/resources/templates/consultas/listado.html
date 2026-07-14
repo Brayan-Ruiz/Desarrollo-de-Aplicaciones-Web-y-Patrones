@@ -5,12 +5,8 @@
     <head th:replace="~{general/fragmentos :: head}"/>        
     <body>
         <header th:replace="~{general/fragmentos :: header}"/>        
-
-        <section th:replace="~{categoria/fragmentos :: agregar}"/> 
-        <section th:replace="~{categoria/fragmentos :: listado}"/>
-        <section th:replace="~{categoria/fragmentos :: confirmarEliminar}"/>
-        <section th:replace="~{general/fragmentos :: mostrarToast}"/>
-
+        <section th:replace="~{consultas/fragmentos :: consultas}"/> 
+        <section th:replace="~{consultas/fragmentos :: tarjetas}"/>
         <footer th:replace="~{general/fragmentos :: footer}"/>
     </body>
 </html>
