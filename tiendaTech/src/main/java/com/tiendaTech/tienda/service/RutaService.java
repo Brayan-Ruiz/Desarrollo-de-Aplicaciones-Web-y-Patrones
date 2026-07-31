@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.tiendaTech.tienda.service;
 
 import com.tiendaTech.tienda.domain.Ruta;
@@ -10,13 +6,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- *
- * @author braru
- */
+@Service
 public class RutaService {
-    private final RutaRepository rutaRepository;
     
+    private final RutaRepository rutaRepository;
+
     public RutaService(RutaRepository rutaRepository) {
         this.rutaRepository = rutaRepository;
     }
@@ -25,4 +19,5 @@ public class RutaService {
     public List<Ruta> getRutas() {
         return rutaRepository.findAllByOrderByRequiereRolAsc();
     }
+    
 }
