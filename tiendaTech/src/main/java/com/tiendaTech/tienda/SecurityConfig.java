@@ -82,5 +82,5 @@ public class SecurityConfig {
                 .build();
         return new InMemoryUserDetailsManager(juan, rebeca, pedro);
     }
-
+    
 }

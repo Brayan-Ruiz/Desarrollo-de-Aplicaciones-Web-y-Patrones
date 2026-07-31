@@ -13,6 +13,7 @@
                     </div>
                     <div class="card-body">
                         <form method="POST" th:action="@{/login}">
+                            <<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <!-- Formulario y campos -->
                             <div class="row my-3">
                                 <label for="username" class="col-md-1 my-auto"><i class="fas fa-user-lock"></i></label>

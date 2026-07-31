@@ -70,4 +70,9 @@ public class ProductoService {
     public List<Producto> consultaPorFecha(LocalDate fechaInf, LocalDate fechaSup) {
         return productoRepository.consultaPorFecha(fechaInf, fechaSup);
     }
+    
+    @Transactional(readOnly = true)
+        public List<Producto> getProductosPorCategoria(Integer idCategoria) {
+            return productoRepository.findByIdCategoriaAndActivoTrue(idCategoria);
+        }
 }

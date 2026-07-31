@@ -27,4 +27,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
     //Consulta de recuperacion de los productos creados en un rango de fechas
     @Query(value = "SELECT p FROM Producto p WHERE p.fechaCreacion BETWEEN :fechaInf AND :fechaSup ORDER BY p.fechaCreacion ASC")
     public List<Producto> consultaPorFecha(@Param("fechaInf") LocalDate fechaInf, @Param("fechaSup") LocalDate fechaSup);
+    
+    //consultar productos por categoría
+    public List<Producto> findByIdCategoriaAndActivoTrue(Integer idCategoria);
 }
