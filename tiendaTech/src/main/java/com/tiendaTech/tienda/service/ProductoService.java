@@ -3,13 +3,13 @@ package com.tiendaTech.tienda.service;
 import com.tiendaTech.tienda.domain.Producto;
 import com.tiendaTech.tienda.repository.ProductoRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import java.time.LocalDate;
 
 @Service
 public class ProductoService {
@@ -65,14 +65,14 @@ public class ProductoService {
     public List<Producto> consultaSQL(BigDecimal precioInf, BigDecimal precioSup) {
         return productoRepository.consultaSQL(precioInf, precioSup);
     }
-    
+
     @Transactional(readOnly = true)
     public List<Producto> consultaPorFecha(LocalDate fechaInf, LocalDate fechaSup) {
         return productoRepository.consultaPorFecha(fechaInf, fechaSup);
     }
-    
+
     @Transactional(readOnly = true)
-        public List<Producto> getProductosPorCategoria(Integer idCategoria) {
-            return productoRepository.findByIdCategoriaAndActivoTrue(idCategoria);
-        }
+    public List<Producto> getProductosPorCategoria(Integer idCategoria) {
+        return productoRepository.findByCategoria_IdCategoriaAndActivoTrue(idCategoria);
+    }
 }
