@@ -1,0 +1,15 @@
+# Configuración de Cloudflare Pages / Workers
+name = "antigravity-finance"
+compatibility_date = "2026-09-01"
+pages_build_output_dir = "."
+
+# Opcional: Descomentar para enlazar con Cloudflare KV en el nivel gratuito
+# [[kv_namespaces]]
+# binding = "FINANCES_KV"
+# id = "<ID_DE_TU_KV_NAMESPACE>"
+
+# Opcional: Descomentar para enlazar con Cloudflare D1 (SQLite en el Edge)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "antigravity-finance-db"
+# database_id = "<ID_DE_TU_D1_DATABASE>"

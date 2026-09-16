@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Antigravity Finance — Dashboard Financiero Personal</title>
+  <meta name="description" content="Plataforma SaaS moderna de gestión y proyección de finanzas personales para Cloudflare Pages." />
+  <meta name="theme-color" content="#0F172A" />
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN con configuración de paleta oficial -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#1E293B',
+              navyDark: '#0F172A',
+              emerald: '#10B981',
+              emeraldDark: '#065F46',
+              red: '#EF4444',
+              redDark: '#991B1B',
+              amber: '#F59E0B',
+              slateBg: '#F8FAFC',
+              slateBorder: '#E2E8F0',
+              manualInput: '#EFF6FF'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="h-full flex flex-col antialiased text-slate-900 bg-[#F8FAFC]">
+
+  <!-- 1. ENCABEZADO SUPERIOR FIJO (Brand, Salud, Selectores de Período y Moneda) -->
+  <header class="sticky top-0 z-30 bg-slate-900 border-b border-slate-800 text-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3">
+        
+        <!-- Logo y Nombre del Sistema -->
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          </div>
+          <div>
+            <span class="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
+              Antigravity <span class="text-emerald-400 font-semibold">Finance</span>
+            </span>
+            <span class="hidden sm:inline-block text-[10px] text-slate-400 uppercase tracking-widest font-mono">Fintech OS</span>
+          </div>
+        </div>
+
+        <!-- Indicador de Salud Financiera (Badge Dinámico en Header) -->
+        <div id="header-health-badge" class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-700/50">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="header-health-label">🟢 Saludable</span>
+        </div>
+
+        <!-- Controles: Selector de Período, Moneda y Respaldos -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- Selector de Período -->
+          <div class="relative">
+            <select id="select-period" class="bg-slate-800 hover:bg-slate-700/80 text-white text-xs font-medium rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer">
+              <option value="current_month" selected>Mes Actual (Sept 2026)</option>
+              <option value="last_3_months">Últimos 3 Meses</option>
+              <option value="current_year">Año en Curso (2026)</option>
+              <option value="all">Historial Completo</option>
+            </select>
+          </div>
+
+          <!-- Selector de Moneda -->
+          <div class="relative">
+            <select id="select-currency" class="bg-slate-800 hover:bg-slate-700/80 text-white text-xs font-bold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer">
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="CRC">CRC (₡)</option>
+              <option value="MXN">MXN ($)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="COP">COP ($)</option>
+            </select>
+          </div>
+
+          <!-- Botón de Respaldo / Ajustes -->
+          <button id="btn-open-settings" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer" title="Configuración y Respaldo de Datos">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </button>
+
+          <!-- Botón de Acción Principal (+ Transacción) -->
+          <button id="btn-global-add-tx" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+            <span>+ Registro</span>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. BARRA DE NAVEGACIÓN PRINCIPAL (7 Secciones requeridas) -->
+    <nav class="bg-slate-900/95 border-t border-slate-800/80 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-2 overflow-x-auto py-2 text-xs font-semibold scrollbar-none" id="main-nav">
+        <button data-tab="dashboard" class="nav-tab active px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-white bg-slate-800 cursor-pointer">
+          <span>📊</span> Dashboard
+        </button>
+        <button data-tab="income" class="nav-tab px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer">
+          <span>💵</span> Ingresos
+        </button>
+        <button data-tab="expense" class="nav-tab px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer">
+          <span>💸</span> Gastos
+        </button>
+        <button data-tab="budget" class="nav-tab px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer">
+          <span>🎯</span> Presupuesto
+        </button>
+        <button data-tab="cashflow" class="nav-tab px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer">
+          <span>🔄</span> Flujo de Caja
+        </button>
+        <button data-tab="projections" class="nav-tab px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer">
+          <span>📈</span> Proyecciones
+        </button>
+        <button data-tab="goals" class="nav-tab px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer">
+          <span>🏆</span> Metas
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 3. ÁREA DE CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div id="view-container">
+      <!-- El contenido de las 7 vistas se inyecta dinámicamente aquí -->
+    </div>
+  </main>
+
+  <!-- 4. PIE DE PÁGINA PROFESIONAL -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-800">Antigravity Finance</span>
+        <span>•</span>
+        <span>Arquitectura sin servidor lista para Cloudflare Pages</span>
+      </div>
+      <div class="flex items-center gap-3 text-[11px] text-slate-400">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Client-Side & Private</span>
+        <span>•</span>
+        <span>Datos locales en el navegador</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 5. MODALES ACCESIBLES (<dialog>) -->
+
+  <!-- Modal: Crear / Editar Transacción (Ingreso o Gasto) -->
+  <dialog id="modal-transaction" class="p-0 rounded-2xl bg-white text-slate-900 border border-slate-200 shadow-2xl max-w-md w-full m-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="modal-tx-title" class="text-lg font-bold text-slate-900">Registrar Transacción</h3>
+        <button type="button" id="modal-tx-close" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="form-transaction" class="mt-4 space-y-4">
+        <input type="hidden" id="tx-id" value="" />
+        
+        <!-- Selector de Tipo: Ingreso / Gasto -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tipo de Movimiento</label>
+          <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-lg">
+            <button type="button" id="tx-type-income" class="py-1.5 text-xs font-bold rounded-md transition-all text-slate-700 hover:text-slate-900 cursor-pointer">
+              💵 Ingreso
+            </button>
+            <button type="button" id="tx-type-expense" class="py-1.5 text-xs font-bold rounded-md transition-all bg-white text-red-600 shadow-xs cursor-pointer">
+              💸 Gasto
+            </button>
+          </div>
+          <input type="hidden" id="tx-type" value="expense" />
+        </div>
+
+        <!-- Monto (Entrada Manual: #EFF6FF) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">
+            Monto (<span id="tx-currency-symbol">$</span>) *
+            <span class="text-[10px] text-blue-600 font-normal">Entrada Manual</span>
+          </label>
+          <input 
+            type="number" 
+            id="tx-amount" 
+            step="0.01" 
+            required 
+            placeholder="0.00" 
+            class="w-full px-3 py-2 text-sm font-bold text-slate-900 bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Fecha (Entrada Manual) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha *</label>
+          <input 
+            type="date" 
+            id="tx-date" 
+            required 
+            class="w-full px-3 py-2 text-xs font-medium text-slate-900 bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Categoría -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Categoría *</label>
+          <select id="tx-category" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400">
+            <!-- Rellenado dinámicamente según tipo -->
+          </select>
+        </div>
+
+        <!-- Concepto / Descripción (Entrada Manual) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Concepto / Descripción (Manual) *</label>
+          <input 
+            type="text" 
+            id="tx-description" 
+            required 
+            placeholder="ej. Supermercado semanal, Nómina, etc." 
+            class="w-full px-3 py-2 text-xs text-slate-900 bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Método / Fuente -->
+        <div id="tx-method-container">
+          <label id="tx-method-label" class="block text-xs font-semibold text-slate-600 mb-1">Método de Pago</label>
+          <select id="tx-method" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400">
+            <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+            <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+            <option value="Transferencia">Transferencia Bancaria</option>
+            <option value="Débito Automático">Débito Automático</option>
+            <option value="Efectivo">Efectivo</option>
+          </select>
+        </div>
+
+        <!-- Recurrencia -->
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="tx-recurring" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500" />
+          <label for="tx-recurring" class="text-xs text-slate-700 select-none">Movimiento fijo mensual recurrente</label>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+          <button type="button" id="tx-btn-cancel" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs transition-colors cursor-pointer">
+            Guardar Transacción
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal: Presupuesto por Categoría -->
+  <dialog id="modal-budget" class="p-0 rounded-2xl bg-white text-slate-900 border border-slate-200 shadow-2xl max-w-md w-full m-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="modal-budget-title" class="text-lg font-bold text-slate-900">Límite de Presupuesto</h3>
+        <button type="button" id="modal-budget-close" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="form-budget" class="mt-4 space-y-4">
+        <input type="hidden" id="budget-id" value="" />
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Categoría *</label>
+          <input type="text" id="budget-category" required placeholder="ej. Vivienda, Alimentación, Ocio" class="w-full px-3 py-2 text-xs bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Monto Límite Asignado *</label>
+          <input type="number" id="budget-allocated" step="1" required placeholder="800" class="w-full px-3 py-2 text-sm font-bold text-slate-900 bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Notas o Criterio</label>
+          <input type="text" id="budget-notes" placeholder="ej. Techo mensual estricto" class="w-full px-3 py-2 text-xs bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+          <button type="button" id="budget-btn-cancel" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg">Cancelar</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs">Guardar Presupuesto</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal: Meta Financiera -->
+  <dialog id="modal-goal" class="p-0 rounded-2xl bg-white text-slate-900 border border-slate-200 shadow-2xl max-w-md w-full m-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="modal-goal-title" class="text-lg font-bold text-slate-900">Nueva Meta Financiera</h3>
+        <button type="button" id="modal-goal-close" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="form-goal" class="mt-4 space-y-4">
+        <input type="hidden" id="goal-id" value="" />
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Título del Objetivo *</label>
+          <input type="text" id="goal-title" required placeholder="ej. Fondo de Emergencia, Vacaciones" class="w-full px-3 py-2 text-xs bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Monto Objetivo *</label>
+            <input type="number" id="goal-target" required step="1" placeholder="10000" class="w-full px-3 py-2 text-sm font-bold bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Ahorro Inicial Actual</label>
+            <input type="number" id="goal-current" step="1" placeholder="2500" class="w-full px-3 py-2 text-sm font-bold bg-[#EFF6FF] border border-blue-200 rounded-lg focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Categoría</label>
+            <input type="text" id="goal-category" placeholder="Inversión, Casa, Viajes" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Prioridad</label>
+            <select id="goal-priority" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none">
+              <option value="Alta">Alta</option>
+              <option value="Media" selected>Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha Límite Estimada</label>
+          <input type="date" id="goal-deadline" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+          <button type="button" id="goal-btn-cancel" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg">Cancelar</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs">Guardar Meta</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal: Ajustes, Respaldo y Restauración -->
+  <dialog id="modal-settings" class="p-0 rounded-2xl bg-white text-slate-900 border border-slate-200 shadow-2xl max-w-md w-full m-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="text-lg font-bold text-slate-900">Respaldo y Configuración</h3>
+        <button type="button" id="modal-settings-close" class="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs text-slate-600">
+        <!-- Exportar Respaldo -->
+        <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-800">Copia de Seguridad Completa</div>
+            <div class="text-[11px] text-slate-500">Descarga un archivo JSON con todos tus movimientos y metas.</div>
+          </div>
+          <button id="btn-export-backup" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-xs cursor-pointer">
+            Exportar
+          </button>
+        </div>
+
+        <!-- Importar Respaldo -->
+        <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col gap-2">
+          <div>
+            <div class="font-bold text-slate-800">Restaurar Copia de Seguridad</div>
+            <div class="text-[11px] text-slate-500">Carga un archivo JSON previamente guardado.</div>
+          </div>
+          <input type="file" id="input-import-file" accept=".json" class="text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+        </div>
+
+        <!-- Restaurar Datos de Ejemplo -->
+        <div class="p-3.5 rounded-xl border border-red-200 bg-red-50/50 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-red-800">Restablecer Datos de Demostración</div>
+            <div class="text-[11px] text-red-600">Vuelve a cargar los datos originales de Septiembre 2026.</div>
+          </div>
+          <button id="btn-reset-demo" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-xs cursor-pointer">
+            Resetear
+          </button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Contenedor de Notificaciones Toast -->
+  <div id="toast-container"></div>
+
+  <!-- Script Principal Modular ES -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
