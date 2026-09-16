@@ -1,14 +1,33 @@
-# 📊 Antigravity Finance — Personal Finance OS
+# 🧨 Finanzas Bombetas — Personal Finance OS & Encrypted Vault
 
-Aplicación Web Completa de Finanzas Personales con diseño premium de grado **Fintech / SaaS**, interactiva, modular y lista para ser alojada de forma **100% gratuita en Cloudflare Pages / Workers**.
+Aplicación Web Completa de Finanzas Personales con diseño premium de grado **Fintech / SaaS**, arquitectura multiusuario y **bóvedas con cifrado militar de extremo a extremo (AES-GCM de 256 bits y PBKDF2)**. 
+
+Optimizada para ser alojada de forma **100% gratuita en GitHub Pages y Cloudflare Pages**.
 
 ---
 
-## 🎨 1. Identidad Visual y Diseño Estético (UX/UI)
+## 🔐 1. Seguridad, Privacidad y Cifrado Zero-Knowledge
 
-El diseño está construido bajo principios de software financiero institucional: minimalista, tipografía de alta legibilidad (*Plus Jakarta Sans* y números tabulares en *JetBrains Mono*), micro-interacciones suaves y una paleta estricta de 5 colores:
+La plataforma garantiza que los datos financieros de cada persona permanezcan estrictamente privados e inaccesibles para terceros:
 
-- **Azul Navy (`#1E293B` / `#0F172A`):** Títulos, navegación principal, encabezados congelados de tablas y acentos institucionales.
+1. **Cifrado Militar AES-GCM (256 bits):**
+   - Todos los ingresos, egresos, metas de ahorro, presupuestos y notas se cifran localmente en el navegador antes de guardarse en el almacenamiento persistente (`localStorage`).
+   - El almacenamiento solo contiene un bloque binario cifrado (*ciphertext* + *IV* único por guardado).
+2. **Derivación Robusta de Claves (PBKDF2):**
+   - A partir de la contraseña maestra del usuario y una sal criptográfica aleatoria única (`crypto.getRandomValues`), se derivan las claves simétricas mediante 100,000 iteraciones con SHA-256.
+   - Las claves maestras existen **únicamente en la memoria volátil** mientras la sesión esté activa; nunca se almacenan en disco.
+3. **Aislamiento Multiusuario:**
+   - Múltiples usuarios pueden registrarse en el mismo dispositivo o navegador. Cada cuenta mantiene su propia bóveda cifrada e independiente.
+4. **Acceso Demo con 1 Clic:**
+   - Para evaluar la aplicación sin registrarse, la pantalla de inicio incluye el botón **"⚡ Entrar con Demo"** (precargada con los datos de Septiembre 2026).
+   - Credenciales Demo: `demo@bombetas.com` / `Bombetas2026!`
+
+---
+
+## 🎨 2. Identidad Visual y Diseño Estético (UX/UI)
+
+Diseño inspirado en plataformas fintech institucionales:
+- **Azul Navy (`#1E293B` / `#0F172A`):** Títulos, navegación superior, encabezados congelados de tablas y acentos institucionales.
 - **Verde Esmeralda (`#10B981` / `#065F46`):** Ingresos, ahorro, flujo neto favorable, escenario optimista y semáforo saludable.
 - **Rojo Suave (`#EF4444` / `#991B1B`):** Gastos, déficit, pérdidas, presupuestos sobrepasados y alertas críticas.
 - **Amarillo / Ámbar (`#F59E0B`):** Advertencias preventivas y presupuestos entre el 75% y 99% de consumo.
@@ -16,99 +35,36 @@ El diseño está construido bajo principios de software financiero institucional
 - **Blanco Puro (`#FFFFFF`):** Fondo principal y tarjetas de métricas calculadas.
 
 ### 📝 Diferenciación Visual de Campos en Tablas
-- **Campos de Entrada Manual:** Resaltados sutilmente con fondo azul claro suave (`#EFF6FF`) y borde azul claro.
-- **Campos Calculados (Fórmulas):** Fondo blanco puro (`#FFFFFF`) con tipografía bold/black.
-- **Resultados Positivos:** Badges y tipografía en Verde Esmeralda.
-- **Alertas / Déficit:** Badges y tipografía en Rojo Suave.
+- **Campos de Entrada Manual:** Resaltados sutilmente con fondo azul claro suave (`#EFF6FF`).
+- **Campos Calculados (Fórmulas):** Fondo blanco puro (`#FFFFFF`) con tipografía destacada.
 
 ---
 
-## 📱 2. Módulos y Navegación
+## 📱 3. Módulos y Navegación
 
-La barra superior y la navegación fija permiten alternar instantáneamente entre las 7 vistas principales:
-
-1. **📊 Dashboard (Vista Principal):**
-   - Encabezado con selector de período (Mes Actual - Septiembre 2026, Últimos 3 Meses, Año en Curso, Todo el Histórico).
-   - Selector de Divisa reactivo en tiempo real: **USD ($)**, **EUR (€)**, **CRC (₡)**, **MXN ($)**, **GBP (£)**, **COP ($)**.
-   - Badge dinámico de Salud Financiera: 🟢 Saludable | 🟡 Atención | 🔴 Crítica.
-   - **4 Tarjetas KPI:** Ingresos Totales (`$8,450.00` | `↑ 12.4%`), Gastos Totales (`$3,200.00` | `↓ 4.1%`), Tasa de Ahorro (`62.1%` | `↑ 2.5%`), Balance Neto (`$5,250.00` | `↑ 18.0%`).
-   - **Gráfico de Evolución:** Área y líneas suaves comparando Ingresos vs. Gastos mes a mes.
-   - **Distribución de Gastos:** Dona minimalista recortada al 72% con colores corporativos.
-   - **Proyecciones Patrimoniales:** Histórico sólido + 3 escenarios proyectados a 12 meses en líneas punteadas.
-   - **Semáforo de Presupuestos y Metas:** Alertas rápidas de consumo.
-
-2. **💵 Ingresos:**
-   - Tabla profesional con encabezado congelado Navy (`sticky top-0`).
-   - Diferenciación de entrada manual `#EFF6FF` vs calculados.
-   - Búsqueda en tiempo real, filtro por categoría, selector de recurrencia y exportación a CSV.
-
-3. **💸 Gastos:**
-   - Tabla de egresos por categoría y método de pago (Tarjeta de Crédito, Débito, Transferencia, etc.).
-   - Clasificación entre gasto fijo o variable.
-   - Búsqueda, filtros dinámicos, edición y exportación a CSV.
-
-4. **🎯 Presupuesto:**
-   - Auditoría de consumo por categoría de gasto.
-   - Barras de progreso con semáforo dinámico (🟢 <75%, 🟡 75%-99%, 🔴 >=100%).
-   - Cálculo automático de margen restante o déficit.
-
-5. **🔄 Flujo de Caja:**
-   - Matriz mensual de liquidez (Ingresos Operativos - Gastos Operativos = Flujo Libre).
-   - Tasa de ahorro mensual, balance acumulado continuo y cálculo de meses de colchón de supervivencia (*Runway*).
-
-6. **📈 Proyecciones:**
-   - Modelado predictivo a 6, 12 y 24 meses.
-   - 3 Escenarios cuantitativos:
-     - 🟢 **Optimista:** +10% ingresos, -5% gastos fijos, 7% retorno anual.
-     - 🔵 **Esperado (Caso Base):** Media histórica, inflación 3.5%, retorno 4%.
-     - 🔘 **Conservador:** -5% ingresos por imprevistos, +10% inflación/gastos.
-
-7. **🏆 Metas:**
-   - Planificación de propósitos financieros con barra de avance porcentual.
-   - Estimación matemática de meses restantes para completarse al ritmo de ahorro actual.
-   - Botón directo de "+ Aportar Capital".
+1. **🔐 Pantalla de Inicio y Autenticación:**
+   - Iniciar sesión en bóvedas existentes o crear una nueva bóveda encriptada.
+   - Acceso con un clic a la cuenta de prueba de Septiembre 2026.
+2. **📊 Dashboard:**
+   - Selector de período y selector de divisas en tiempo real (**USD `$`, EUR `€`, CRC `₡`, MXN `$`, GBP `£`, COP `$`**).
+   - Diagnóstico de salud financiera (🟢 Saludable | 🟡 Atención | 🔴 Crítica).
+   - 4 Tarjetas KPI con comparativa vs período anterior.
+   - Gráfico de Evolución (Ingresos vs Gastos en área suave) y Dona de distribución de egresos con Chart.js.
+   - Proyecciones a 12 meses: Línea sólida histórica + líneas punteadas para 3 escenarios (🟢 Optimista, 🔵 Esperado, 🔘 Conservador).
+3. **💵 Ingresos:** Tabla con encabezado fijo, campos manuales `#EFF6FF`, filtros y exportación CSV.
+4. **💸 Gastos:** Clasificación fija vs variable, control de métodos de pago y filtros.
+5. **🎯 Presupuesto:** Semáforo de consumo (🟢 <75%, 🟡 75%-99%, 🔴 >=100%) y margen restante.
+6. **🔄 Flujo de Caja:** Matriz de liquidez mensual y cálculo de meses de colchón (*Runway*).
+7. **📈 Proyecciones:** Simulador interactivo con horizontes de 6, 12 y 24 meses.
+8. **🏆 Metas:** Seguimiento de objetivos de ahorro y estimación de tiempo de cumplimiento.
 
 ---
 
-## 🌐 3. Guía de Despliegue Gratuito en Cloudflare Pages
+## 🌐 4. Despliegue en GitHub Pages y Cloudflare Pages
 
-Esta aplicación está optimizada con **cero sobrecarga de compilación**, lo que garantiza una velocidad instantánea de carga y compatibilidad nativa con el plan gratuito de Cloudflare.
+### Link Público en GitHub Pages:
+👉 **[https://brayan-ruiz.github.io/Desarrollo-de-Aplicaciones-Web-y-Patrones/](https://brayan-ruiz.github.io/Desarrollo-de-Aplicaciones-Web-y-Patrones/)**
 
-### Método 1: Arrastrar y Soltar (Direct Upload - En 30 segundos)
-1. Inicia sesión en [Cloudflare Dashboard](https://dash.cloudflare.com/).
-2. Dirígete a **Workers & Pages** > **Create application** > **Pages** > **Upload assets**.
-3. Asigna un nombre a tu proyecto (ej. `antigravity-finance`).
-4. Arrastra la carpeta de este proyecto (`Paginas de Pruebas`) al recuadro de carga.
-5. Haz clic en **Deploy site**. ¡Tu sitio estará en vivo inmediatamente en una URL `*.pages.dev` gratuita con SSL automático!
-
-### Método 2: Conexión Automática con Git (GitHub / GitLab)
-1. Sube este código a un repositorio de GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: Antigravity Finance Dashboard"
-   git branch -M main
-   git remote add origin <URL_DE_TU_REPOSITORIO>
-   git push -u origin main
-   ```
-2. En Cloudflare Dashboard, ve a **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
-3. Selecciona tu repositorio.
-4. En **Build settings**:
-   - Framework preset: `None`
-   - Build command: *(dejar vacío)*
-   - Build output directory: `.`
-5. Haz clic en **Save and Deploy**. A partir de ese momento, cada commit desplegará automáticamente los cambios.
-
-### Método 3: Mediante Cloudflare Wrangler CLI
-```bash
-npx wrangler pages deploy . --project-name=antigravity-finance
-```
-
----
-
-## 🔒 4. Privacidad y Persistencia de Datos
-
-- **100% Privado y Local:** Todos tus datos se almacenan en el `localStorage` de tu navegador; ninguna transacción personal sale a servidores de terceros de manera forzada.
-- **Copia de Seguridad y Restauración:** Mediante el icono de engranaje en la barra superior puedes exportar un respaldo completo en formato **JSON** e importarlo en cualquier momento o dispositivo.
-- **Exportación Contable:** Las tablas de Ingresos y Gastos cuentan con exportación nativa a **CSV** compatible con Microsoft Excel y Google Sheets.
-- **Edge API Function:** Incluye `/functions/api/sync.js` preconfigurado en caso de que desees conectar Cloudflare KV o D1 como backend distribuido sin coste.
+### Despliegue en Cloudflare Pages:
+1. Conecta el repositorio de GitHub o arrastra la carpeta en [dash.cloudflare.com](https://dash.cloudflare.com/) > **Workers & Pages** > **Upload assets**.
+2. Al estar construido en HTML/JS/CSS modular sin dependencias pesadas, se despliega en segundos.

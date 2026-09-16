@@ -1,6 +1,6 @@
 /**
- * Antigravity Finance - Application Orchestrator
- * Enrutamiento de pestañas, gestión de modales, sincronización reactiva y controladores globales.
+ * Finanzas Bombetas - Application Orchestrator
+ * Control de sesiones cifradas, guardias de autenticación, enrutamiento y reactividad.
  */
 
 import { store } from './state.js';
@@ -9,6 +9,7 @@ import { calculateKPIs, evaluateFinancialHealth, evaluateBudgets, filterByPeriod
 import { exportToJSON, importFromJSON } from './utils/exportImport.js';
 
 // Vistas
+import { renderAuthView } from './views/authView.js';
 import { renderDashboard } from './views/dashboardView.js';
 import { renderIncomeView } from './views/incomeView.js';
 import { renderExpenseView } from './views/expenseView.js';
@@ -17,7 +18,6 @@ import { renderCashFlowView } from './views/cashFlowView.js';
 import { renderProjectionsView } from './views/projectionsView.js';
 import { renderGoalsView } from './views/goalsView.js';
 
-// Categorías predefinidas
 const INCOME_CATEGORIES = [
   'Salario Base',
   'Consultoría / Freelance',
@@ -54,17 +54,14 @@ class App {
     this.setupModals();
     this.setupStateSubscription();
 
-    // Sincronizar selectores iniciales con el estado
+    // Sincronizar selectores con el estado actual
     const state = store.getState();
     const curSelect = document.getElementById('select-currency');
     const perSelect = document.getElementById('select-period');
     if (curSelect) curSelect.value = state.currency;
     if (perSelect) perSelect.value = state.period;
 
-    // Actualizar badge de salud en el encabezado
-    this.updateHeaderHealthBadge();
-
-    // Renderizar vista inicial
+    // Renderizar la vista correspondiente (Auth o Dashboard)
     this.renderCurrentView();
 
     // Escuchar eventos globales personalizados
@@ -85,7 +82,7 @@ class App {
     });
   }
 
-  // --- NAVEGACIÓN Y ENRUTAMIENTO ---
+  // --- NAVEGACIÓN Y GUARDIA DE AUTENTICACIÓN ---
   setupNavigation() {
     this.navTabs.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -96,9 +93,13 @@ class App {
   }
 
   navigateTo(viewName) {
+    if (!store.isAuthenticated()) {
+      this.renderCurrentView();
+      return;
+    }
+
     this.currentView = viewName;
 
-    // Actualizar estilos visuales de las pestañas
     this.navTabs.forEach(tab => {
       const isTarget = tab.dataset.tab === viewName;
       if (isTarget) {
@@ -116,6 +117,35 @@ class App {
   renderCurrentView() {
     if (!this.viewContainer) return;
     this.viewContainer.innerHTML = '';
+
+    const isAuth = store.isAuthenticated();
+    const appControls = document.getElementById('header-app-controls');
+    const navBar = document.getElementById('app-nav-bar');
+    const healthBadge = document.getElementById('header-health-badge');
+
+    // Control de visibilidad de barra y controles según autenticación
+    if (!isAuth) {
+      if (appControls) {
+        appControls.classList.add('hidden');
+        appControls.classList.remove('flex');
+      }
+      if (navBar) navBar.classList.add('hidden');
+      if (healthBadge) healthBadge.classList.add('hidden');
+
+      renderAuthView(this.viewContainer);
+      return;
+    }
+
+    // Usuario Autenticado: Mostrar navegación y controles
+    if (appControls) {
+      appControls.classList.remove('hidden');
+      appControls.classList.add('flex');
+    }
+    if (navBar) navBar.classList.remove('hidden');
+    if (healthBadge) healthBadge.classList.remove('hidden');
+
+    this.updateUserProfileUI();
+    this.updateHeaderHealthBadge();
 
     switch (this.currentView) {
       case 'dashboard':
@@ -144,8 +174,33 @@ class App {
     }
   }
 
-  // --- CONTROLES GLOBALES (Moneda, Período, Respaldos) ---
+  updateUserProfileUI() {
+    const user = store.getCurrentUser();
+    if (!user) return;
+
+    const nameEl = document.getElementById('user-display-name');
+    const initialsEl = document.getElementById('user-avatar-initials');
+
+    if (nameEl) nameEl.textContent = user.name || user.email;
+    if (initialsEl) {
+      const char = (user.name && user.name.length > 0) ? user.name[0].toUpperCase() : 'U';
+      initialsEl.textContent = char;
+    }
+  }
+
+  // --- CONTROLES GLOBALES ---
   setupGlobalControls() {
+    // Cerrar Sesión / Bloquear Bóveda
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        if (confirm('¿Deseas cerrar y bloquear tu bóveda financiera?')) {
+          store.logout();
+          this.showToast('Bóveda bloqueada con éxito', 'info');
+        }
+      });
+    }
+
     // Selector de Moneda
     const curSelect = document.getElementById('select-currency');
     if (curSelect) {
@@ -163,7 +218,7 @@ class App {
       });
     }
 
-    // Botón global de nueva transacción en header
+    // Botón de nueva transacción rápida
     const addTxBtn = document.getElementById('btn-global-add-tx');
     if (addTxBtn) {
       addTxBtn.addEventListener('click', () => {
@@ -171,7 +226,7 @@ class App {
       });
     }
 
-    // Botón de Configuración y Respaldos
+    // Configuración y Respaldos
     const settingsBtn = document.getElementById('btn-open-settings');
     const settingsModal = document.getElementById('modal-settings');
     const settingsClose = document.getElementById('modal-settings-close');
@@ -184,8 +239,8 @@ class App {
       const exportBtn = document.getElementById('btn-export-backup');
       if (exportBtn) {
         exportBtn.addEventListener('click', () => {
-          exportToJSON(store.getState());
-          this.showToast('Copia de seguridad descargada exitosamente', 'success');
+          exportToJSON(store.getState(), `boveda_bombetas_${new Date().toISOString().split('T')[0]}.json`);
+          this.showToast('Bóveda exportada exitosamente', 'success');
         });
       }
 
@@ -199,7 +254,7 @@ class App {
               const data = await importFromJSON(file);
               store.importData(data);
               settingsModal.close();
-              this.showToast('Datos restaurados correctamente desde JSON', 'success');
+              this.showToast('Datos restaurados correctamente en tu bóveda', 'success');
             } catch (err) {
               alert(err.message || 'Error al restaurar archivo');
             }
@@ -211,10 +266,10 @@ class App {
       const resetBtn = document.getElementById('btn-reset-demo');
       if (resetBtn) {
         resetBtn.addEventListener('click', () => {
-          if (confirm('¿Restablecer el sistema a los datos iniciales de Septiembre 2026? Se borrarán los cambios locales.')) {
+          if (confirm('¿Restablecer los datos de esta bóveda a los valores iniciales de Septiembre 2026?')) {
             store.resetToDefaults();
             settingsModal.close();
-            this.showToast('Datos restablecidos a la configuración de demo', 'info');
+            this.showToast('Datos restablecidos a la configuración de prueba', 'info');
           }
         });
       }
@@ -224,12 +279,13 @@ class App {
   // --- SUSCRIPCIÓN REACTIVA AL STORE ---
   setupStateSubscription() {
     store.subscribe(() => {
-      this.updateHeaderHealthBadge();
       this.renderCurrentView();
     });
   }
 
   updateHeaderHealthBadge() {
+    if (!store.isAuthenticated()) return;
+
     const state = store.getState();
     const kpis = calculateKPIs(state.incomes, state.expenses, state.referenceMonth);
     const currentExpenses = filterByPeriod(state.expenses, state.period, state.referenceMonth);
@@ -241,18 +297,17 @@ class App {
     if (badgeEl && labelEl) {
       labelEl.textContent = health.label;
       if (health.status === 'healthy') {
-        badgeEl.className = 'hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-700/50';
+        badgeEl.className = 'hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-700/50';
       } else if (health.status === 'warning') {
-        badgeEl.className = 'hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-700/50';
+        badgeEl.className = 'hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-700/50';
       } else {
-        badgeEl.className = 'hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-950/80 text-red-300 border border-red-700/50';
+        badgeEl.className = 'hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-950/80 text-red-300 border border-red-700/50';
       }
     }
   }
 
   // --- MODAL: TRANSACCIONES (INGRESO / GASTO) ---
   setupModals() {
-    // Cerrar modales con clic fuera del cuadro
     document.querySelectorAll('dialog').forEach(diag => {
       diag.addEventListener('click', (e) => {
         const rect = diag.getBoundingClientRect();
@@ -314,12 +369,12 @@ class App {
         const itemData = { date, category, description, amount, source: method, isRecurring };
         if (id) store.updateIncome(id, itemData);
         else store.addIncome(itemData);
-        this.showToast('Ingreso registrado correctamente', 'success');
+        this.showToast('Ingreso cifrado y registrado', 'success');
       } else {
         const itemData = { date, category, description, amount, paymentMethod: method, isRecurring };
         if (id) store.updateExpense(id, itemData);
         else store.addExpense(itemData);
-        this.showToast('Gasto registrado correctamente', 'success');
+        this.showToast('Gasto cifrado y registrado', 'success');
       }
 
       modal.close();
@@ -343,11 +398,9 @@ class App {
     const type = options.type || 'expense';
     const item = options.item || null;
 
-    // Disparar click en botón de tipo
     const typeBtn = type === 'income' ? document.getElementById('tx-type-income') : document.getElementById('tx-type-expense');
     if (typeBtn) typeBtn.click();
 
-    // Fecha por defecto: hoy
     document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
 
     if (item) {
@@ -385,10 +438,10 @@ class App {
 
       if (id) {
         store.updateBudget(id, { category, allocated, notes });
-        this.showToast('Límite de presupuesto actualizado', 'success');
+        this.showToast('Presupuesto actualizado y cifrado', 'success');
       } else {
         store.addBudget({ category, allocated, notes });
-        this.showToast('Nuevo presupuesto creado', 'success');
+        this.showToast('Nuevo presupuesto cifrado guardado', 'success');
       }
 
       modal.close();
@@ -440,10 +493,10 @@ class App {
 
       if (id) {
         store.updateGoal(id, { title, targetAmount, currentAmount, category, priority, deadline });
-        this.showToast('Meta financiera actualizada', 'success');
+        this.showToast('Meta financiera actualizada y cifrada', 'success');
       } else {
         store.addGoal({ title, targetAmount, currentAmount, category, priority, deadline });
-        this.showToast('Nueva meta de ahorro registrada', 'success');
+        this.showToast('Nueva meta cifrada registrada', 'success');
       }
 
       modal.close();
@@ -498,7 +551,7 @@ class App {
   }
 }
 
-// Inicializar la aplicación cuando el DOM esté listo
+// Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new App();
 });
